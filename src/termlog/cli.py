@@ -85,6 +85,23 @@ def overview():
     print('\nRecord: term <name> | Read: termlog <name> [lines] | Search: termlog --grep <pattern>')
 
 
+def warn_idle_logs(current_session):
+    cutoff = time.time() - 7 * 86400
+    for path in root().glob('*.log'):
+        if path.stem == current_session:
+            continue
+        try:
+            with lock(path.stem):
+                if path.stat().st_mtime < cutoff:
+                    print('warn: you have idle logs over 7 days old. You may want to run '
+                          'termlog --clean 7 to remove old log files over 7 days idle '
+                          'from storage.', file=sys.stderr, flush=True)
+                    return
+        except (Timeout, FileNotFoundError):
+            # Active recordings and logs concurrently cleaned up are not idle.
+            continue
+
+
 def prune(days):
     for p in logs():
         try:
@@ -311,6 +328,7 @@ def term():
         n = name(n)
         shell = (shutil.which('pwsh') or os.environ.get('COMSPEC', 'cmd.exe')) if os.name == 'nt' else os.environ.get('SHELL', '/bin/sh')
         with lock(n):
+            warn_idle_logs(n)
             code = record(n, a.command or [shell])
         raise SystemExit(code)
     except Timeout:

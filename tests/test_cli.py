@@ -62,6 +62,34 @@ class Sessions(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('marker', (cli.root() / 'unicode.log').read_text())
 
+    def test_idle_warning_on_start(self):
+        old = cli.root() / 'old.log'
+        old.write_text('preserve this history')
+        stale = time.time() - 8 * 86400
+        os.utime(old, (stale, stale))
+        result = self.run_cli('term', 'new', '--command', sys.executable, '-c', 'pass')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr.count('warn:'), 1)
+        self.assertIn('termlog --clean 7', result.stderr)
+        self.assertEqual(old.read_text(), 'preserve this history')
+        self.assertNotIn('warn:', self.run_cli('termlog').stderr)
+        with cli.lock('old'):
+            result = self.run_cli('term', 'other', '--command', sys.executable, '-c', 'pass')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn('warn:', result.stderr)
+        result = self.run_cli('term', 'old', '--command', sys.executable, '-c', 'pass')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn('warn:', result.stderr)
+
+    def test_recent_logs_do_not_warn(self):
+        path = cli.root() / 'recent.log'
+        path.write_text('recent history')
+        recent = time.time() - 6 * 86400
+        os.utime(path, (recent, recent))
+        result = self.run_cli('term', 'new', '--command', sys.executable, '-c', 'pass')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn('warn:', result.stderr)
+
     def test_exit_code(self):
         self.assertEqual(self.run_cli('term', 'failed', '--command', sys.executable, '-c', 'raise SystemExit(7)').returncode, 7)
 

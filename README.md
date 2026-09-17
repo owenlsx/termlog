@@ -58,6 +58,8 @@ another shell, for example `term work --command powershell.exe -NoLogo`.
 - Concurrent use of the same name and nested recordings are refused.
 - OS file locks identify live recorders. Stop requests carry a session token,
   avoiding signals to stale or reused process IDs.
+- Starting a recording warns if other ended sessions have logs idle for over seven
+  days, suggesting `termlog --clean 7`. The session being resumed is excluded.
 - Cleanup is explicit and skips live recordings. Lock files are intentionally kept.
 - `TERMLOG_SESSION` is available inside the recorded shell for custom prompts.
 - Tail reads are bounded to the final 400 KB. Search streams the complete log.
