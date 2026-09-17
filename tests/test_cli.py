@@ -56,6 +56,12 @@ class Sessions(unittest.TestCase):
         self.assertFalse(cli.live('demo'))
         self.assertIn('ended', cli.meta('demo'))
 
+    def test_legacy_output_encoding(self):
+        with patch.dict(os.environ, {'PYTHONIOENCODING': 'ascii'}):
+            result = self.run_cli('term', 'unicode', '--command', sys.executable, '-c', 'print("marker")')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('marker', (cli.root() / 'unicode.log').read_text())
+
     def test_exit_code(self):
         self.assertEqual(self.run_cli('term', 'failed', '--command', sys.executable, '-c', 'raise SystemExit(7)').returncode, 7)
 

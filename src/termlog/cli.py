@@ -105,7 +105,16 @@ def positive(value):
     return result
 
 
+def configure_output():
+    # Redirected Windows output may use a legacy code page. Keep the selected
+    # encoding, but never abort recording because a character is unrepresentable.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(errors='replace')
+
+
 def termlog():
+    configure_output()
     p = argparse.ArgumentParser(description='Read terminal recordings (ANSI sequences removed).')
     g = p.add_mutually_exclusive_group()
     g.add_argument('-a', '--all', action='store_true', help='tail every live session')
@@ -271,6 +280,7 @@ def record(n, command):
 
 
 def term():
+    configure_output()
     p = argparse.ArgumentParser(description='Record a named interactive shell for humans and AI agents.')
     p.add_argument('session', nargs='?', type=name)
     p.add_argument('-l', '--list', action='store_true')
