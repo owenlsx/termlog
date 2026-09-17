@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "termlog-cli"
+version = "0.1.0"
+description = "Named terminal recordings that humans and AI agents can read"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "owenlsx"}]
+dependencies = ["filelock>=3.13,<4", "ptyprocess>=0.7,<1; sys_platform != 'win32'", "pywinpty>=2.0.13,<4; sys_platform == 'win32'"]
+
+[project.scripts]
+term = "termlog.cli:term"
+termlog = "termlog.cli:termlog"
+
+[project.urls]
+Repository = "https://github.com/owenlsx/termlog"
+
+[tool.setuptools.packages.find]
+where = ["src"]
