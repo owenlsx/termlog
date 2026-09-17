@@ -17,7 +17,7 @@ With [uv](https://docs.astral.sh/uv/getting-started/installation/):
 uv tool install git+https://github.com/owenlsx/termlog.git
 ```
 
-Or with [pipx](https://pipx.pypa.io/stable/installation/):
+Or with [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html):
 
 ```sh
 pipx install git+https://github.com/owenlsx/termlog.git
